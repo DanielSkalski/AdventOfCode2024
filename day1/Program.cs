@@ -10,6 +10,20 @@ while (file.ReadLine() is {} line)
     list2.Add(int.Parse(numbers[^1]));
 }
 
-var result = list1.Order().Zip(list2.Order(), (a, b) => Math.Abs(a - b)).Sum();
+Dictionary<int, int> lookup = [];
+
+foreach (var number in list2)
+{
+    if (lookup.ContainsKey(number))
+    {
+        lookup[number]++;
+    }
+    else
+    {
+        lookup[number] = 1;
+    }
+}
+
+var result = list1.Aggregate(0, (curr, num) => curr + (lookup.ContainsKey(num) ? num * lookup[num] : 0));
 
 Console.WriteLine(result);
