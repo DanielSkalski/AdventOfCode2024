@@ -25,4 +25,24 @@ foreach (Match match in Regex.Matches(text, pattern))
     }
 }
 
+var pattern2 = @"(?<mul>mul)\((?<a>\d+),(?<b>\d+)\)|(?<dont>don't)\(\)|(?<do>do)\(\)";
+var sum2 = Regex.Matches(text, pattern2).Select(match => match switch
+{
+    _ when match.Groups["dont"].Success => (Instruction)new DoNot(),
+    _ when match.Groups["do"].Success => new Do(),
+    _ => new Multiply(int.Parse(match.Groups["a"].Value), int.Parse(match.Groups["b"].Value)),
+}).Aggregate((sum: 0, include: true), (curr, instruction) => instruction switch
+{
+    DoNot => (sum, false),
+    Do => (sum, true),
+    Multiply m when curr.include => (sum += m.A * m.B, curr.include),
+    _ => curr,
+}).sum;
+
 Console.WriteLine(sum);
+Console.WriteLine(sum2);
+
+record Instruction();
+record Multiply(int A, int B) : Instruction();
+record Do() : Instruction();
+record DoNot() : Instruction();
